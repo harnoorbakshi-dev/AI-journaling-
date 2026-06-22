@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>AI Journal</h1>
+
+<form action="{{ url_for('save') }}" method="POST">
+    <textarea name="content" placeholder="What's on your mind today?"></textarea>
+    <br>
+    <button type="submit">Save Entry</button>
+</form>
+
+<h2>Past Entries</h2>
+
+<form action="{{ url_for('index') }}" method="GET">
+    <label for="date">Filter by date:</label>
+    <input type="date" id="date" name="date" value="{{ selected_date }}">
+    <button type="submit">Search</button>
+    {% if selected_date %}
+        <a href="{{ url_for('index') }}" style="margin-left: 10px;">Clear filter</a>
+    {% endif %}
+</form>
+{% if entries %}
+<ul class="entry-list">
+    {% for entry in entries %}
+    <li>
+        <a href="{{ url_for('view_entry', entry_id=entry['id']) }}">
+            <div class="timestamp">{{ entry['created_at']|readable_date }}</div>
+            <div class="entry-preview">{{ entry['content'][:80] }}{% if entry['content']|length > 80 %}...{% endif %}</div>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% elif selected_date %}
+<p>No entries found for {{ selected_date }}.</p>
+{% else %}
+<p>No entries yet. Write your first one above.</p>
+{% endif %}
+{% endblock %}

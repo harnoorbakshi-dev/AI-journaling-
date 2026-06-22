@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{{ url_for('index') }}" class="back-link">&larr; Back to all entries</a>
+
+<h1>Journal Entry</h1>
+<div class="timestamp">{{ entry['created_at']|readable_date }}</div>
+<p>{{ entry['content'] }}</p>
+
+<div class="reflection">
+    {{ entry['reflection'] }}
+</div>
+{% endblock %}
