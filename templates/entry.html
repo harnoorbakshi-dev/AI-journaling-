@@ -1,12 +1,198 @@
 {% extends "base.html" %}
+
 {% block content %}
-<a href="{{ url_for('index') }}" class="back-link">&larr; Back to all entries</a>
 
-<h1>Journal Entry</h1>
-<div class="timestamp">{{ entry['created_at']|readable_date }}</div>
-<p>{{ entry['content'] }}</p>
+<div class="entry-page">
 
-<div class="reflection">
-    {{ entry['reflection'] }}
+    <!-- Back Button -->
+
+    <a href="{{ url_for('index') }}" class="back-link">
+        ← Back to Journal
+    </a>
+
+
+    <!-- Journal Paper -->
+
+    <section class="entry-paper">
+
+        <div class="entry-header">
+
+            <div>
+
+                <span class="entry-label">
+                    Entry #{{ entry['id'] }}
+                </span>
+
+                <h1>Your Journal</h1>
+
+                <p class="entry-date">
+                    {{ entry['created_at']|readable_date }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="entry-divider"></div>
+
+        <div class="journal-body">
+
+            {{ entry['content'] }}
+
+        </div>
+
+    </section>
+
+
+
+    <!-- AI Reflection -->
+
+    <section class="reflection-card">
+
+        <div class="reflection-title">
+
+            ✦ AI Reflection
+
+        </div>
+
+        <p>
+
+            {{ entry['reflection'] }}
+
+        </p>
+
+    </section>
+
+
+
+    <!-- Conversation -->
+
+    <section class="conversation-section">
+
+        <h2>
+
+            Continue Reflecting
+
+        </h2>
+
+        <p class="section-description">
+
+            A thoughtful conversation inspired by your journal.
+
+        </p>
+
+
+        <div class="conversation-list">
+
+            {% for message in messages %}
+
+                {% if message['role']=="user" %}
+
+                <div class="conversation-message user">
+
+                    <div class="message-role">
+
+                        You
+
+                    </div>
+
+                    <div class="message-content">
+
+                        {{ message['content'] }}
+
+                    </div>
+
+                </div>
+
+                {% else %}
+
+                <div class="conversation-message ai">
+
+                    <div class="message-role">
+
+                        AI Companion
+
+                    </div>
+
+                    <div class="message-content">
+
+                        {{ message['content'] }}
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+
+
+        {% if entry['summary'] %}
+
+        <div class="summary-card">
+
+            <h3>
+
+                Conversation Summary
+
+            </h3>
+
+            <p>
+
+                {{ entry['summary'] }}
+
+            </p>
+
+        </div>
+
+        {% else %}
+
+        <form
+            action="{{ url_for('chat', entry_id=entry['id']) }}"
+            method="POST"
+            class="reply-form"
+        >
+
+            <textarea
+                name="message"
+                rows="5"
+                placeholder="Continue your reflection..."
+                required
+            ></textarea>
+
+            <button type="submit">
+
+                Send Message
+
+            </button>
+
+        </form>
+
+
+        <form
+            action="{{ url_for('end_chat', entry_id=entry['id']) }}"
+            method="POST"
+            style="margin-top:20px;"
+        >
+
+            <button
+                class="secondary-button"
+                type="submit"
+            >
+
+                Finish Conversation
+
+            </button>
+
+        </form>
+
+        {% endif %}
+
+    </section>
+
 </div>
+
 {% endblock %}

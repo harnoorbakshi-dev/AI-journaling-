@@ -1,0 +1,1109 @@
+/* =========================================================
+                     JOURNELLE UI SYSTEM
+========================================================= */
+
+/* ---------- Google Fonts ---------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ---------- Variables ---------- */
+
+:root{
+
+--background:#F8F7F4;
+
+--card:#FFFFFF;
+
+--card-soft:#F4F2FF;
+
+--primary:#6B63FF;
+
+--primary-dark:#564EEA;
+
+--text:#222437;
+
+--muted:#7D8195;
+
+--border:#E9E5DD;
+
+--shadow:
+0 8px 30px rgba(0,0,0,.05);
+
+--radius:24px;
+
+--transition:.28s ease;
+
+}
+
+/* ---------- Reset ---------- */
+
+*{
+
+margin:0;
+
+padding:0;
+
+box-sizing:border-box;
+
+}
+
+html{
+
+scroll-behavior:smooth;
+
+}
+
+body{
+
+background:var(--background);
+
+font-family:"Inter",sans-serif;
+
+color:var(--text);
+
+line-height:1.7;
+
+min-height:100vh;
+
+}
+
+/* ---------- Typography ---------- */
+
+h1,h2,h3,h4{
+
+font-family:"Fraunces",serif;
+
+font-weight:600;
+
+letter-spacing:-.02em;
+
+color:var(--text);
+
+}
+
+h1{
+
+font-size:4rem;
+
+line-height:1;
+
+}
+
+h2{
+
+font-size:2rem;
+
+}
+
+h3{
+
+font-size:1.35rem;
+
+}
+
+p{
+
+color:var(--muted);
+
+}
+
+a{
+
+text-decoration:none;
+
+color:inherit;
+
+}
+
+/* ---------- Layout ---------- */
+
+.page{
+
+width:min(1150px,92%);
+
+margin:auto;
+
+padding:40px 0 70px;
+
+}
+
+/* ---------- Navigation ---------- */
+
+nav{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding-bottom:25px;
+
+margin-bottom:45px;
+
+border-bottom:1px solid var(--border);
+
+}
+
+.nav-brand{
+
+display:flex;
+
+flex-direction:column;
+
+gap:4px;
+
+}
+
+.logo{
+
+font-family:"Fraunces",serif;
+
+font-size:1.7rem;
+
+font-weight:700;
+
+}
+
+.tagline{
+
+font-size:.9rem;
+
+color:var(--muted);
+
+}
+
+.nav-links{
+
+display:flex;
+
+align-items:center;
+
+gap:18px;
+
+font-size:.95rem;
+
+}
+
+.username{
+
+padding:8px 16px;
+
+background:var(--card-soft);
+
+border-radius:999px;
+
+font-weight:600;
+
+}
+
+.nav-links a{
+
+transition:var(--transition);
+
+}
+
+.nav-links a:hover{
+
+color:var(--primary);
+
+}
+
+/* ---------- Hero ---------- */
+
+.hero{
+
+margin-bottom:55px;
+
+}
+
+.hero-badge{
+
+display:inline-flex;
+
+align-items:center;
+
+gap:8px;
+
+padding:10px 16px;
+
+background:#EEEAFE;
+
+border-radius:999px;
+
+color:var(--primary);
+
+font-size:.85rem;
+
+font-weight:600;
+
+margin-bottom:22px;
+
+}
+
+.hero h1{
+
+margin-bottom:18px;
+
+}
+
+.hero-subtitle{
+
+max-width:620px;
+
+font-size:1.08rem;
+
+}
+
+/* ---------- Cards ---------- */
+
+.card{
+
+background:var(--card);
+
+border-radius:var(--radius);
+
+padding:30px;
+
+border:1px solid var(--border);
+
+box-shadow:var(--shadow);
+
+margin-bottom:28px;
+
+transition:var(--transition);
+
+}
+
+.card:hover{
+
+transform:translateY(-2px);
+
+}
+
+/* ---------- Buttons ---------- */
+
+button{
+
+border:none;
+
+outline:none;
+
+padding:15px 30px;
+
+background:var(--primary);
+
+color:white;
+
+font-size:.95rem;
+
+font-weight:600;
+
+border-radius:16px;
+
+cursor:pointer;
+
+transition:var(--transition);
+
+}
+
+button:hover{
+
+background:var(--primary-dark);
+
+transform:translateY(-2px);
+
+}
+
+/* ---------- Inputs ---------- */
+
+textarea,
+
+input[type=text],
+
+input[type=password],
+
+input[type=date]{
+
+width:100%;
+
+padding:18px;
+
+margin-top:15px;
+
+margin-bottom:20px;
+
+border-radius:18px;
+
+border:1px solid var(--border);
+
+background:white;
+
+font-size:1rem;
+
+font-family:"Inter";
+
+transition:var(--transition);
+
+}
+
+textarea{
+
+resize:vertical;
+
+min-height:200px;
+
+}
+
+textarea:focus,
+
+input:focus{
+
+outline:none;
+
+border-color:var(--primary);
+
+box-shadow:0 0 0 4px rgba(107,99,255,.08);
+
+}
+
+/* ---------- Flash ---------- */
+
+.flash{
+
+background:#F2EEFF;
+
+padding:16px;
+
+border-radius:18px;
+
+margin-bottom:25px;
+
+color:var(--primary);
+
+font-weight:500;
+
+}
+
+/* ---------- Utilities ---------- */
+
+.section-description{
+
+margin-top:10px;
+
+margin-bottom:25px;
+
+}
+
+.timestamp{
+
+font-size:.82rem;
+
+color:var(--muted);
+
+}
+
+.back-link{
+
+display:inline-flex;
+
+align-items:center;
+
+gap:8px;
+
+margin-bottom:30px;
+
+color:var(--primary);
+
+font-weight:600;
+
+}
+
+/* ================================
+        NAVIGATION IMPROVEMENTS
+================================ */
+
+nav{
+
+position:sticky;
+
+top:18px;
+
+z-index:100;
+
+background:rgba(248,247,244,.80);
+
+backdrop-filter:blur(14px);
+
+border:1px solid var(--border);
+
+border-radius:24px;
+
+padding:18px 28px;
+
+margin-bottom:55px;
+
+box-shadow:var(--shadow);
+
+}
+
+.logo{
+
+font-size:1.8rem;
+
+letter-spacing:-1px;
+
+}
+
+.nav-links{
+
+gap:24px;
+
+}
+
+.nav-links a{
+
+font-weight:600;
+
+color:var(--muted);
+
+}
+
+.nav-links a:hover{
+
+color:var(--primary);
+
+}
+
+.username{
+
+background:#EEEAFE;
+
+color:var(--primary);
+
+padding:10px 18px;
+
+border-radius:999px;
+
+}
+
+/*==========================================================
+                    ARCHIVE LIST
+==========================================================*/
+
+.archive-list{
+
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    margin-top:28px;
+
+}
+
+.archive-card{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    background:#fff;
+
+    border:1px solid var(--border);
+
+    border-radius:22px;
+
+    padding:24px 28px;
+
+    text-decoration:none;
+
+    color:inherit;
+
+    transition:.28s ease;
+
+    box-shadow:
+    0 6px 24px rgba(0,0,0,.04);
+
+}
+
+.archive-card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+    0 16px 38px rgba(0,0,0,.08);
+
+}
+
+.archive-left{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:18px;
+
+}
+
+.archive-dot{
+
+    width:13px;
+
+    height:13px;
+
+    border-radius:50%;
+
+    margin-top:8px;
+
+    flex-shrink:0;
+
+}
+
+.dot-0{background:#796BFF;}
+.dot-1{background:#68C77E;}
+.dot-2{background:#E8B84A;}
+.dot-3{background:#E58E4B;}
+.dot-4{background:#E36A72;}
+
+.archive-title{
+
+    font-family:"Fraunces",serif;
+
+    font-size:1.45rem;
+
+    margin-bottom:8px;
+
+    color:var(--text);
+
+}
+
+.archive-time{
+
+    color:var(--muted);
+
+    font-size:.9rem;
+
+    margin-bottom:8px;
+
+}
+
+.archive-subtitle{
+
+    color:var(--muted);
+
+    font-size:.92rem;
+
+}
+
+.archive-right{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:flex-end;
+
+    gap:10px;
+
+}
+
+.archive-date{
+
+    font-size:.9rem;
+
+    color:var(--muted);
+
+}
+
+.archive-open{
+
+    color:var(--primary);
+
+    font-weight:600;
+
+    transition:.25s ease;
+
+}
+
+.archive-card:hover .archive-open{
+
+    transform:translateX(5px);
+
+}
+/*==========================================================
+                    ENTRY PAGE
+==========================================================*/
+
+.entry-page{
+    max-width:900px;
+    margin:0 auto;
+}
+
+.back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:var(--muted);
+    text-decoration:none;
+    margin-bottom:28px;
+    font-weight:500;
+    transition:.3s;
+}
+
+.back-link:hover{
+    color:var(--primary);
+    transform:translateX(-3px);
+}
+
+.entry-paper{
+
+    background:white;
+
+    border-radius:32px;
+
+    padding:60px;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+    margin-bottom:40px;
+
+}
+
+.entry-label{
+
+    display:inline-block;
+
+    font-size:.8rem;
+
+    letter-spacing:3px;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:12px;
+
+}
+
+.entry-header h1{
+
+    margin:0;
+
+    font-size:2.7rem;
+
+}
+
+.entry-date{
+
+    margin-top:10px;
+
+    color:var(--muted);
+
+    font-size:1rem;
+
+}
+
+.entry-divider{
+
+    width:80px;
+
+    height:3px;
+
+    background:var(--border);
+
+    border-radius:999px;
+
+    margin:40px 0;
+
+}
+
+.journal-body{
+
+    font-size:1.08rem;
+
+    line-height:2;
+
+    color:var(--text);
+
+    white-space:pre-wrap;
+
+}
+
+.reflection-card{
+
+    background:linear-gradient(
+        135deg,
+        #f5f2ff,
+        #ede8ff
+    );
+
+    border-radius:28px;
+
+    padding:34px 38px;
+
+    margin-bottom:40px;
+
+    border:1px solid rgba(124,92,255,.08);
+
+}
+
+.reflection-title{
+
+    font-weight:700;
+
+    color:var(--primary);
+
+    margin-bottom:18px;
+
+    letter-spacing:1px;
+
+}
+
+.reflection-card p{
+
+    margin:0;
+
+    line-height:1.9;
+
+    font-size:1.03rem;
+
+}
+
+.conversation-section{
+
+    background:white;
+
+    border-radius:30px;
+
+    padding:50px;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+}
+
+.conversation-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:24px;
+
+    margin:40px 0;
+
+}
+
+.conversation-message{
+
+    padding:26px;
+
+    border-radius:22px;
+
+    border:1px solid var(--border);
+
+}
+
+.conversation-message.ai{
+
+    background:#f8f7ff;
+
+}
+
+.conversation-message.user{
+
+    background:#faf9f7;
+
+}
+
+.message-role{
+
+    font-size:.8rem;
+
+    text-transform:uppercase;
+
+    letter-spacing:2px;
+
+    color:var(--muted);
+
+    margin-bottom:14px;
+
+    font-weight:700;
+
+}
+
+.message-content{
+
+    line-height:1.9;
+
+}
+
+.reply-form{
+
+    margin-top:30px;
+
+}
+
+.reply-form textarea{
+
+    min-height:160px;
+
+}
+
+.secondary-button{
+
+    background:transparent;
+
+    color:var(--muted);
+
+    border:1px solid var(--border);
+
+}
+
+.secondary-button:hover{
+
+    background:#f6f6f6;
+
+}
+
+.summary-card{
+
+    margin-top:35px;
+
+    padding:30px;
+
+    background:#f8f8f8;
+
+    border-radius:24px;
+
+}
+
+.summary-card h3{
+
+    margin-top:0;
+
+}
+
+/*==========================================================
+                    AUTHENTICATION
+==========================================================*/
+
+.auth-container{
+
+    min-height:75vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.auth-card{
+
+    width:100%;
+
+    max-width:520px;
+
+    background:white;
+
+    border-radius:32px;
+
+    padding:50px;
+
+    border:1px solid var(--border);
+
+    box-shadow:var(--shadow);
+
+}
+
+.auth-card h1{
+
+    font-size:2.8rem;
+
+    margin:15px 0;
+
+}
+
+.auth-card form{
+
+    margin-top:30px;
+
+}
+
+.auth-card label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    color:var(--muted);
+
+    font-weight:600;
+
+}
+
+.auth-card input{
+
+    margin-bottom:24px;
+
+}
+
+.auth-card button{
+
+    width:100%;
+
+    margin-top:10px;
+
+}
+
+.auth-footer{
+
+    margin-top:35px;
+
+    text-align:center;
+
+    color:var(--muted);
+
+}
+
+.auth-footer a{
+
+    color:var(--primary);
+
+    font-weight:600;
+
+    margin-left:6px;
+
+}
+
+/*==========================================================
+                        NAVBAR V2
+==========================================================*/
+
+nav{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:20px 28px;
+
+margin-bottom:55px;
+
+background:rgba(255,255,255,.82);
+
+backdrop-filter:blur(18px);
+
+border-radius:26px;
+
+border:1px solid var(--border);
+
+box-shadow:0 12px 40px rgba(0,0,0,.05);
+
+}
+
+.logo-wrapper{
+
+display:flex;
+
+align-items:center;
+
+gap:18px;
+
+}
+
+.logo-icon{
+
+width:52px;
+
+height:52px;
+
+border-radius:16px;
+
+background:linear-gradient(
+135deg,
+#766CFF,
+#5D55EA
+);
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-family:"Fraunces";
+
+font-size:1.5rem;
+
+font-weight:700;
+
+color:white;
+
+box-shadow:0 8px 20px rgba(107,99,255,.25);
+
+}
+
+.nav-right{
+
+display:flex;
+
+align-items:center;
+
+gap:18px;
+
+}
+
+.user-pill{
+
+padding:10px 18px;
+
+border-radius:999px;
+
+background:#F2F0FF;
+
+color:var(--primary);
+
+font-weight:600;
+
+}
+
+.logout-btn{
+
+color:var(--muted);
+
+transition:.3s;
+
+}
+
+.logout-btn:hover{
+
+color:var(--primary);
+
+}
+
+.signup-btn{
+
+background:var(--primary);
+
+color:white;
+
+padding:10px 18px;
+
+border-radius:999px;
+
+transition:.3s;
+
+}
+
+.signup-btn:hover{
+
+background:var(--primary-dark);
+
+}

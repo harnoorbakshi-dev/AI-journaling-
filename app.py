@@ -6,9 +6,12 @@ from datetime import datetime
 
 load_dotenv()  # loads OPENAI_API_KEY from .env into the environment
 
-from db import init_db, save_entry, get_all_entries, get_entry_by_id, get_entries_by_date, create_user, get_user_by_username
-from reflection import generate_reflection
-
+from db import (
+    init_db, save_entry, get_all_entries, get_entry_by_id, get_entries_by_date,
+    create_user, get_user_by_username, save_message, get_messages_for_entry,
+    save_summary, get_entry_owner
+)
+from reflection import generate_reflection, generate_chat_reply, generate_summary
 app = Flask(__name__)
 app.secret_key = "dev-secret-key-change-this"  # required for flash messages to work
 
@@ -134,7 +137,72 @@ def view_entry(entry_id):
     if entry is None:
         flash("That entry doesn't exist.")
         return redirect(url_for("index"))
-    return render_template("entry.html", entry=entry)
+
+    messages = get_messages_for_entry(entry_id)
+    return render_template("entry.html", entry=entry, messages=messages)
+
+
+@app.route("/entry/<int:entry_id>/chat", methods=["POST"])
+@login_required
+def chat(entry_id):
+    user_id = session["user_id"]
+
+    # Ownership check: make sure this entry actually belongs to the
+    # logged-in user before letting them post a message into its chat.
+    if get_entry_owner(entry_id) != user_id:
+        flash("That entry doesn't exist.")
+        return redirect(url_for("index"))
+
+    entry = get_entry_by_id(user_id, entry_id)
+    if entry["summary"]:
+        flash("This conversation has already ended.")
+        return redirect(url_for("view_entry", entry_id=entry_id))
+    user_message = request.form.get("message", "").strip()
+
+    if not user_message:
+        flash("Type something before sending.")
+        return redirect(url_for("view_entry", entry_id=entry_id))
+
+    # Save the user's new message first.
+    save_message(entry_id, "user", user_message)
+
+    # Build the full conversation history (initial reflection + every
+    # message since) so the AI replies with full context.
+    history = [{"role": "ai", "content": entry["reflection"]}]
+    for m in get_messages_for_entry(entry_id):
+        history.append({"role": m["role"], "content": m["content"]})
+
+    ai_reply = generate_chat_reply(entry["content"], history)
+    save_message(entry_id, "ai", ai_reply)
+
+    return redirect(url_for("view_entry", entry_id=entry_id))
+
+
+@app.route("/entry/<int:entry_id>/end_chat", methods=["POST"])
+@login_required
+def end_chat(entry_id):
+    user_id = session["user_id"]
+
+    if get_entry_owner(entry_id) != user_id:
+        flash("That entry doesn't exist.")
+        return redirect(url_for("index"))
+
+    entry = get_entry_by_id(user_id, entry_id)
+    if entry["summary"]:
+        flash("This conversation has already ended.")
+        return redirect(url_for("view_entry", entry_id=entry_id))
+
+    user_message = request.form.get("message", "").strip()
+
+    history = [{"role": "ai", "content": entry["reflection"]}]
+    for m in get_messages_for_entry(entry_id):
+        history.append({"role": m["role"], "content": m["content"]})
+
+    summary = generate_summary(entry["content"], history)
+    save_summary(entry_id, summary)
+
+    flash("Conversation ended and summarized.")
+    return redirect(url_for("view_entry", entry_id=entry_id))
 
 
 if __name__ == "__main__":

@@ -1,37 +1,239 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h1>AI Journal</h1>
 
-<form action="{{ url_for('save') }}" method="POST">
-    <textarea name="content" placeholder="What's on your mind today?"></textarea>
-    <br>
-    <button type="submit">Save Entry</button>
-</form>
+<!-- ================= HERO ================= -->
 
-<h2>Past Entries</h2>
+<section class="hero">
 
-<form action="{{ url_for('index') }}" method="GET">
-    <label for="date">Filter by date:</label>
-    <input type="date" id="date" name="date" value="{{ selected_date }}">
-    <button type="submit">Search</button>
-    {% if selected_date %}
-        <a href="{{ url_for('index') }}" style="margin-left: 10px;">Clear filter</a>
-    {% endif %}
-</form>
+    <span class="hero-badge">
+        ✦ AI Journaling Companion
+    </span>
+
+    <h1>Journelle</h1>
+
+    <p class="hero-subtitle">
+        Capture your thoughts, revisit your memories, and reflect with an AI companion that grows with you.
+    </p>
+
+</section>
+
+
+<!-- ================= JOURNAL FORM ================= -->
+
+<section class="card">
+
+    <h2>Today's Entry</h2>
+
+    <p class="section-description">
+        Write freely. Your journal is private and your AI companion is here to help you reflect.
+    </p>
+
+    <form action="{{ url_for('save') }}" method="POST">
+
+        <textarea
+            name="content"
+            rows="8"
+            placeholder="What's on your mind today?"
+            required
+        ></textarea>
+
+        <button type="submit">
+            Save Entry
+        </button>
+
+    </form>
+
+</section>
+
+
+
+<!-- ================= ARCHIVE HEADER ================= -->
+
+<section class="entries-header">
+
+    <div>
+
+        <h2>Your Journal Archive</h2>
+
+        <p class="section-description">
+            Every journal entry becomes another chapter in your story.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= FILTER ================= -->
+
+<section class="card filter-card">
+
+    <form
+        action="{{ url_for('index') }}"
+        method="GET"
+        class="filter-form"
+    >
+
+        <div>
+
+            <label for="date">
+
+                Browse by Date
+
+            </label>
+
+            <input
+                type="date"
+                id="date"
+                name="date"
+                value="{{ selected_date }}"
+            >
+
+        </div>
+
+        <div class="filter-actions">
+
+            <button type="submit">
+
+                Search
+
+            </button>
+
+            {% if selected_date %}
+
+            <a
+                href="{{ url_for('index') }}"
+                class="clear-filter"
+            >
+
+                Clear
+
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </form>
+
+</section>
+
+
+
+<!-- ================= JOURNAL ARCHIVE ================= -->
+
 {% if entries %}
-<ul class="entry-list">
-    {% for entry in entries %}
-    <li>
-        <a href="{{ url_for('view_entry', entry_id=entry['id']) }}">
-            <div class="timestamp">{{ entry['created_at']|readable_date }}</div>
-            <div class="entry-preview">{{ entry['content'][:80] }}{% if entry['content']|length > 80 %}...{% endif %}</div>
-        </a>
-    </li>
-    {% endfor %}
-</ul>
+
+<div class="archive-list">
+
+{% for entry in entries %}
+
+<a href="{{ url_for('view_entry', entry_id=entry['id']) }}"
+   class="archive-card">
+
+    <div class="archive-left">
+
+        <div class="archive-dot dot-{{ loop.index0 % 5 }}"></div>
+
+        <div>
+
+            <div class="archive-title">
+
+                Entry #{{ entry['id'] }}
+
+            </div>
+
+            <div class="archive-time">
+
+                🕒 {{ entry['created_at']|readable_date }}
+
+            </div>
+
+            <div class="archive-subtitle">
+
+                Continue your reflection
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="archive-right">
+
+        <div class="archive-date">
+
+            📅 {{ entry['created_at']|readable_date }}
+
+        </div>
+
+        <div class="archive-open">
+
+            Open →
+
+        </div>
+
+    </div>
+
+</a>
+
+{% endfor %}
+
+</div>
+
 {% elif selected_date %}
-<p>No entries found for {{ selected_date }}.</p>
+
+<div class="card empty-state">
+
+    <div class="empty-icon">
+
+        📅
+
+    </div>
+
+    <h3>
+
+        Nothing found
+
+    </h3>
+
+    <p>
+
+        There are no journal entries for
+
+        <strong>{{ selected_date }}</strong>.
+
+    </p>
+
+</div>
+
 {% else %}
-<p>No entries yet. Write your first one above.</p>
+
+<div class="card empty-state">
+
+    <div class="empty-icon">
+
+        📖
+
+    </div>
+
+    <h3>
+
+        Your journal begins here.
+
+    </h3>
+
+    <p>
+
+        The first page is always the hardest to write.
+        Start today's entry above and begin your journey.
+
+    </p>
+
+</div>
+
 {% endif %}
+
 {% endblock %}

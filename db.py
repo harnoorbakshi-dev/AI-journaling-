@@ -17,11 +17,11 @@ def get_connection():
 
 def init_db():
     """
-    Creates the users and entries tables if they don't already exist.
-    If journal.db is missing, SQLite creates it fresh automatically.
-    If journal.db exists but is corrupted (not a valid SQLite file),
-    we back up the bad file and create a brand new empty database
-    instead of crashing or refusing to start.
+    Creates the users, entries, and messages tables if they don't
+    already exist. If journal.db is missing, SQLite creates it fresh
+    automatically. If journal.db exists but is corrupted, we back up
+    the bad file and create a brand new empty database instead of
+    crashing or refusing to start.
     """
     try:
         conn = get_connection()
@@ -39,8 +39,19 @@ def init_db():
                 user_id INTEGER NOT NULL,
                 content TEXT NOT NULL,
                 reflection TEXT,
+                summary TEXT,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                entry_id INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (entry_id) REFERENCES entries (id)
             )
         """)
         conn.commit()
@@ -73,13 +84,23 @@ def init_db():
                 user_id INTEGER NOT NULL,
                 content TEXT NOT NULL,
                 reflection TEXT,
+                summary TEXT,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                entry_id INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (entry_id) REFERENCES entries (id)
+            )
+        """)
         conn.commit()
         conn.close()
-
 def save_entry(user_id, content, reflection):
     """
     Saves a new journal entry for a specific user, along with its
@@ -113,14 +134,15 @@ def get_all_entries(user_id):
 
 def get_entry_by_id(user_id, entry_id):
     """
-    Returns a single entry (with its reflection) by id, but only if it
-    belongs to the given user. Returns None if the entry doesn't exist
-    OR belongs to someone else — both cases are treated identically so
-    we don't leak whether an entry id exists for another account.
+    Returns a single entry (with its reflection and summary) by id,
+    but only if it belongs to the given user. Returns None if the
+    entry doesn't exist OR belongs to someone else — both cases are
+    treated identically so we don't leak whether an entry id exists
+    for another account.
     """
     conn = get_connection()
     row = conn.execute(
-        "SELECT id, content, reflection, created_at FROM entries WHERE id = ? AND user_id = ?",
+        "SELECT id, content, reflection, summary, created_at FROM entries WHERE id = ? AND user_id = ?",
         (entry_id, user_id)
     ).fetchone()
     conn.close()
@@ -172,3 +194,60 @@ def get_user_by_username(username):
     ).fetchone()
     conn.close()
     return row
+
+def save_message(entry_id, role, content):
+    """
+    Saves one message (either from the user or the AI) as part of the
+    ongoing chat attached to a specific entry.
+    """
+    conn = get_connection()
+    conn.execute(
+        "INSERT INTO messages (entry_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (entry_id, role, content, datetime.now().isoformat())
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_messages_for_entry(entry_id):
+    """
+    Returns every message in the chat for a given entry, in the order
+    they were sent (oldest first) — used both to render the chat and
+    to give the AI the full conversation history for context.
+    """
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT role, content, created_at FROM messages WHERE entry_id = ? ORDER BY id ASC",
+        (entry_id,)
+    ).fetchall()
+    conn.close()
+    return rows
+
+
+def save_summary(entry_id, summary):
+    """
+    Saves the final summary of a chat onto its entry, once the user
+    ends the conversation.
+    """
+    conn = get_connection()
+    conn.execute(
+        "UPDATE entries SET summary = ? WHERE id = ?",
+        (summary, entry_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_entry_owner(entry_id):
+    """
+    Returns just the user_id that owns a given entry, or None if the
+    entry doesn't exist. Used to verify ownership before allowing chat
+    actions on an entry, without fetching the full row.
+    """
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT user_id FROM entries WHERE id = ?",
+        (entry_id,)
+    ).fetchone()
+    conn.close()
+    return row["user_id"] if row else None

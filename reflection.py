@@ -53,3 +53,88 @@ def generate_reflection(entry_text, timeout=15):
         print(f"\n[DEBUG] Unexpected error: {type(e).__name__}: {e}\n")
         return ("Something unexpected happened while generating a "
                 "reflection, but your entry has been saved safely.")
+    
+def generate_chat_reply(entry_text, conversation_history, timeout=15):
+    """
+    Continues an ongoing reflective conversation. `conversation_history`
+    is a list of dicts like [{"role": "user"/"ai", "content": "..."}],
+    representing everything said so far in this entry's chat (not
+    including the entry itself or the initial reflection). Returns the
+    AI's next reply, with the same graceful fallback behavior as
+    generate_reflection.
+    """
+    # Build the conversation so Gemini sees the original entry first,
+    # then every message that's happened since, in order.
+    contents = []
+    for msg in conversation_history:
+        role = "model" if msg["role"] == "ai" else "user"
+        contents.append(
+            types.Content(role=role, parts=[types.Part(text=msg["content"])])
+        )
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=(
+                    SYSTEM_PROMPT +
+                    f"\n\nFor context, here is the journal entry that started "
+                    f"this conversation: \"{entry_text}\""
+                ),
+                max_output_tokens=300,
+                temperature=0.8,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                http_options=types.HttpOptions(timeout=timeout * 1000),
+            ),
+        )
+        return response.text.strip()
+
+    except errors.ClientError:
+        return ("I ran into an issue replying just now, but the conversation "
+                "has been saved safely.")
+    except errors.ServerError:
+        return ("Gemini's servers had an issue replying, but the conversation "
+                "has been saved safely.")
+    except Exception:
+        return ("Something unexpected happened, but the conversation has "
+                "been saved safely.")
+
+
+def generate_summary(entry_text, conversation_history, timeout=15):
+    """
+    Generates a short summary of the entire conversation (the original
+    entry plus everything discussed afterward), to be saved once the
+    user ends the chat. Always returns *something* usable, even on
+    failure, so ending a conversation never leaves an entry without
+    some kind of summary.
+    """
+    transcript_lines = [f"Journal entry: {entry_text}"]
+    for msg in conversation_history:
+        speaker = "Companion" if msg["role"] == "ai" else "User"
+        transcript_lines.append(f"{speaker}: {msg['content']}")
+    transcript = "\n".join(transcript_lines)
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=transcript,
+            config=types.GenerateContentConfig(
+                system_instruction=(
+                    "Summarize this journaling conversation in 1-2 short, "
+                    "warm sentences. Focus on what the person actually "
+                    "shared and how the conversation evolved, not generic "
+                    "phrasing. Write it as a brief note for the person to "
+                    "read later, not as advice."
+                ),
+                max_output_tokens=150,
+                temperature=0.7,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                http_options=types.HttpOptions(timeout=timeout * 1000),
+            ),
+        )
+        return response.text.strip()
+
+    except Exception:
+        return "Summary unavailable, but the full conversation is saved below."
+    
