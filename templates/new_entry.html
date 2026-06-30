@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero">
+    <span class="hero-badge">✦ AI Journaling Companion</span>
+    <h1>Journelle</h1>
+    <p class="hero-subtitle">
+        Start wherever you are today. Your companion is listening.
+    </p>
+</section>
+
+<div class="entry-page">
+
+    <div class="chat-thread">
+        <div class="chat-bubble ai">What's on your mind today?</div>
+    </div>
+
+    <form action="{{ url_for('start_chat') }}" method="POST" class="chat-input-form">
+        <textarea
+            name="message"
+            rows="1"
+            placeholder="Start writing..."
+            required
+        ></textarea>
+        <button type="submit">Send</button>
+    </form>
+
+</div>
+
+{% endblock %}

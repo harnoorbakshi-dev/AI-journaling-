@@ -21,7 +21,7 @@
 
     <div class="nav-left">
 
-        <div class="logo-wrapper">
+        <a href="{{ url_for('index') }}" class="logo-wrapper">
 
             <div class="logo-icon">
 
@@ -45,13 +45,25 @@
 
             </div>
 
-        </div>
+        </a>
 
     </div>
 
     <div class="nav-right">
 
         {% if session.get('user_id') %}
+
+        <a href="{{ url_for('index') }}" class="logout-btn">
+
+            New Entry
+
+        </a>
+
+        <a href="{{ url_for('archive') }}" class="logout-btn">
+
+            Archive
+
+        </a>
 
         <div class="user-pill">
 

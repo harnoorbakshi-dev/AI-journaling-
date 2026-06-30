@@ -403,22 +403,6 @@ color:var(--muted);
 
 }
 
-.back-link{
-
-display:inline-flex;
-
-align-items:center;
-
-gap:8px;
-
-margin-bottom:30px;
-
-color:var(--primary);
-
-font-weight:600;
-
-}
-
 /* ================================
         NAVIGATION IMPROVEMENTS
 ================================ */
@@ -630,11 +614,11 @@ border-radius:999px;
 
 }
 /*==========================================================
-                    ENTRY PAGE
+                    ENTRY PAGE — CHAT THREAD
 ==========================================================*/
 
 .entry-page{
-    max-width:900px;
+    max-width:720px;
     margin:0 auto;
 }
 
@@ -654,25 +638,23 @@ border-radius:999px;
     transform:translateX(-3px);
 }
 
-.entry-paper{
+.chat-thread-header{
 
-    background:white;
+    display:flex;
 
-    border-radius:32px;
+    justify-content:space-between;
 
-    padding:60px;
+    align-items:center;
 
-    border:1px solid var(--border);
+    margin-bottom:18px;
 
-    box-shadow:var(--shadow);
+    color:var(--muted);
 
-    margin-bottom:40px;
+    font-size:.85rem;
 
 }
 
 .entry-label{
-
-    display:inline-block;
 
     font-size:.8rem;
 
@@ -682,173 +664,133 @@ border-radius:999px;
 
     color:var(--muted);
 
-    margin-bottom:12px;
-
-}
-
-.entry-header h1{
-
-    margin:0;
-
-    font-size:2.7rem;
-
 }
 
 .entry-date{
 
-    margin-top:10px;
-
     color:var(--muted);
 
-    font-size:1rem;
+    font-size:.85rem;
 
 }
 
-.entry-divider{
-
-    width:80px;
-
-    height:3px;
-
-    background:var(--border);
-
-    border-radius:999px;
-
-    margin:40px 0;
-
-}
-
-.journal-body{
-
-    font-size:1.08rem;
-
-    line-height:2;
-
-    color:var(--text);
-
-    white-space:pre-wrap;
-
-}
-
-.reflection-card{
-
-    background:linear-gradient(
-        135deg,
-        #f5f2ff,
-        #ede8ff
-    );
-
-    border-radius:28px;
-
-    padding:34px 38px;
-
-    margin-bottom:40px;
-
-    border:1px solid rgba(124,92,255,.08);
-
-}
-
-.reflection-title{
-
-    font-weight:700;
-
-    color:var(--primary);
-
-    margin-bottom:18px;
-
-    letter-spacing:1px;
-
-}
-
-.reflection-card p{
-
-    margin:0;
-
-    line-height:1.9;
-
-    font-size:1.03rem;
-
-}
-
-.conversation-section{
-
-    background:white;
-
-    border-radius:30px;
-
-    padding:50px;
-
-    border:1px solid var(--border);
-
-    box-shadow:var(--shadow);
-
-}
-
-.conversation-list{
+.chat-thread{
 
     display:flex;
 
     flex-direction:column;
 
-    gap:24px;
+    gap:14px;
 
-    margin:40px 0;
+    margin-bottom:24px;
 
 }
 
-.conversation-message{
+.chat-bubble{
 
-    padding:26px;
+    display:inline-block;
 
-    border-radius:22px;
+    max-width:60%;
+
+    width:fit-content;
+
+    padding:12px 16px;
+
+    border-radius:20px;
+
+    line-height:1.5;
+
+    font-size:.98rem;
+
+    white-space:pre-wrap;
+
+}
+
+.chat-bubble.user{
+
+    align-self:flex-end;
+
+    background:var(--primary);
+
+    color:white;
+
+    border-bottom-right-radius:6px;
+
+}
+
+.chat-bubble.ai{
+
+    align-self:flex-start;
+
+    background:#E4E0FF;
+
+    color:var(--text);
+
+    border-bottom-left-radius:6px;
+
+}
+
+.chat-input-form{
+
+    display:flex;
+
+    gap:10px;
+
+    align-items:flex-end;
+
+    background:var(--card);
 
     border:1px solid var(--border);
 
-}
+    border-radius:24px;
 
-.conversation-message.ai{
-
-    background:#f8f7ff;
+    padding:10px 10px 10px 20px;
 
 }
 
-.conversation-message.user{
+.chat-input-form textarea{
 
-    background:#faf9f7;
+    flex:1;
 
-}
+    border:none;
 
-.message-role{
+    resize:none;
 
-    font-size:.8rem;
+    font-family:"Inter",sans-serif;
 
-    text-transform:uppercase;
+    font-size:.98rem;
 
-    letter-spacing:2px;
+    line-height:1.5;
 
-    color:var(--muted);
+    padding:8px 0;
 
-    margin-bottom:14px;
+    margin:0;
 
-    font-weight:700;
+    max-height:140px;
 
-}
+    min-height:auto;
 
-.message-content{
-
-    line-height:1.9;
+    background:transparent;
 
 }
 
-.reply-form{
+.chat-input-form textarea:focus{
 
-    margin-top:30px;
+    outline:none;
+
+    box-shadow:none;
+
+    border-color:transparent;
 
 }
 
-.reply-form textarea{
+.chat-input-form button{
 
-    min-height:160px;
+    border-radius:18px;
+
+    padding:10px 22px;
+
+    white-space:nowrap;
 
 }
 
@@ -1015,6 +957,10 @@ display:flex;
 align-items:center;
 
 gap:18px;
+
+text-decoration:none;
+
+color:inherit;
 
 }
 

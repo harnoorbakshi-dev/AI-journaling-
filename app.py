@@ -100,9 +100,9 @@ def logout():
     flash("You've been logged out.")
     return redirect(url_for("login"))
 
-@app.route("/")
+@app.route("/archive")
 @login_required
-def index():
+def archive():
     user_id = session["user_id"]
     selected_date = request.args.get("date", "").strip()
 
@@ -111,17 +111,33 @@ def index():
     else:
         entries = get_all_entries(user_id)
 
-    return render_template("index.html", entries=entries, selected_date=selected_date)
+    return render_template("archive.html", entries=entries, selected_date=selected_date)
 
 
-@app.route("/save", methods=["POST"])
+@app.route("/")
 @login_required
-def save():
+def index():
+    """
+    The new landing page after login: a fresh chat starting with
+    'What's on your mind today?' The user's first message becomes
+    the journal entry itself.
+    """
+    return render_template("new_entry.html")
+
+
+@app.route("/start_chat", methods=["POST"])
+@login_required
+def start_chat():
+    """
+    Takes the user's very first message as the journal entry's content,
+    generates the initial reflection, saves both as a new entry, and
+    sends the user into that entry's ongoing conversation page.
+    """
     user_id = session["user_id"]
-    content = request.form.get("content", "").strip()
+    content = request.form.get("message", "").strip()
 
     if not content:
-        flash("Your entry can't be empty — write a little something first.")
+        flash("Write something before sending.")
         return redirect(url_for("index"))
 
     reflection = generate_reflection(content)
@@ -136,7 +152,7 @@ def view_entry(entry_id):
     entry = get_entry_by_id(user_id, entry_id)
     if entry is None:
         flash("That entry doesn't exist.")
-        return redirect(url_for("index"))
+        return redirect(url_for("archive"))
 
     messages = get_messages_for_entry(entry_id)
     return render_template("entry.html", entry=entry, messages=messages)
@@ -151,7 +167,7 @@ def chat(entry_id):
     # logged-in user before letting them post a message into its chat.
     if get_entry_owner(entry_id) != user_id:
         flash("That entry doesn't exist.")
-        return redirect(url_for("index"))
+        return redirect(url_for("archive"))
 
     entry = get_entry_by_id(user_id, entry_id)
     if entry["summary"]:
@@ -185,7 +201,7 @@ def end_chat(entry_id):
 
     if get_entry_owner(entry_id) != user_id:
         flash("That entry doesn't exist.")
-        return redirect(url_for("index"))
+        return redirect(url_for("archive"))
 
     entry = get_entry_by_id(user_id, entry_id)
     if entry["summary"]:
