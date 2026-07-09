@@ -1,122 +1,912 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Journelle</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- =====================================================
+         APPLY SAVED THEME BEFORE PAGE RENDER
+    ====================================================== -->
+
+    <script>
+        (function () {
+
+            const savedTheme = localStorage.getItem(
+                "journelle-theme"
+            );
+
+            if (savedTheme === "dark") {
+
+                document.documentElement.setAttribute(
+                    "data-theme",
+                    "dark"
+                );
+
+            } else if (savedTheme === "light") {
+
+                document.documentElement.setAttribute(
+                    "data-theme",
+                    "light"
+                );
+
+            } else if (
+                window.matchMedia &&
+                window.matchMedia(
+                    "(prefers-color-scheme: dark)"
+                ).matches
+            ) {
+
+                document.documentElement.setAttribute(
+                    "data-theme",
+                    "dark"
+                );
+
+            }
+
+        })();
+    </script>
+
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 
 </head>
 
+
 <body>
 
-<div class="page">
 
-   <nav>
+{% set auth_endpoints = [
+    'login',
+    'signup',
+    'forgot_password',
+    'reset_password'
+] %}
 
-    <div class="nav-left">
 
-        <a href="{{ url_for('index') }}" class="logo-wrapper">
+<!-- =========================================================
+     AUTHENTICATED APPLICATION
+     PI-STYLE LEFT SIDEBAR SHELL
+========================================================= -->
 
-            <div class="logo-icon">
+{% if session.get('user_id') and request.endpoint not in auth_endpoints %}
 
-                J
+    <div class="app-shell">
+
+
+        <!-- =================================================
+             MOBILE SIDEBAR OVERLAY
+        ================================================== -->
+
+        <button
+            type="button"
+            class="sidebar-overlay"
+            data-sidebar-overlay
+            aria-label="Close navigation"
+            tabindex="-1"
+        ></button>
+
+
+        <!-- =================================================
+             LEFT SIDEBAR
+        ================================================== -->
+
+        <aside
+            class="app-sidebar"
+            data-app-sidebar
+            aria-label="Journelle navigation"
+        >
+
+
+            <!-- =============================================
+                 SIDEBAR HEADER
+            ============================================== -->
+
+            <div class="sidebar-header">
+
+                <a
+                    href="{{ url_for('index') }}"
+                    class="sidebar-brand"
+                    aria-label="Journelle home"
+                >
+
+                    <div class="sidebar-brand-icon">
+                        J
+                    </div>
+
+                    <div class="sidebar-brand-copy">
+
+                        <span class="sidebar-brand-name">
+                            Journelle
+                        </span>
+
+                        <span class="sidebar-brand-tagline">
+                            AI journal
+                        </span>
+
+                    </div>
+
+                </a>
+
+
+                <button
+                    type="button"
+                    class="sidebar-collapse-button"
+                    data-sidebar-close
+                    aria-label="Close navigation"
+                    title="Close navigation"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path d="M15 18l-6-6 6-6"></path>
+                    </svg>
+
+                </button>
 
             </div>
 
-            <div>
 
-                <div class="logo">
+            <!-- =============================================
+                 PRIMARY NAVIGATION
+            ============================================== -->
 
-                    Journelle
+            <nav class="sidebar-navigation">
+
+
+                <a
+                    href="{{ url_for('index') }}"
+                    class="sidebar-nav-item
+                    {% if request.endpoint == 'index' %}
+                        active
+                    {% endif %}"
+                >
+
+                    <span class="sidebar-nav-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M12 5v14"></path>
+                            <path d="M5 12h14"></path>
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        New Entry
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('archive') }}"
+                    class="sidebar-nav-item
+                    {% if request.endpoint == 'archive' %}
+                        active
+                    {% endif %}"
+                >
+
+                    <span class="sidebar-nav-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M4 7h16"></path>
+                            <path d="M6 7v12h12V7"></path>
+                            <path d="M9 11h6"></path>
+                            <path d="M9 15h4"></path>
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Archive
+                    </span>
+
+                </a>
+
+            </nav>
+
+
+            <!-- =============================================
+                 PRIVACY-SAFE RECENT CONVERSATIONS
+
+                 Hidden automatically when the logged-in
+                 user has zero entries.
+
+                 No journal content is displayed in the
+                 sidebar or exposed through hover tooltips.
+            ============================================== -->
+
+            {% if recent_entries %}
+
+                <section
+                    class="sidebar-section sidebar-recents"
+                    aria-label="Recent journal conversations"
+                >
+
+                    <span class="sidebar-section-label">
+                        Recents
+                    </span>
+
+
+                    <div class="sidebar-recents-list">
+
+                        {% for recent_entry in recent_entries %}
+
+                            <a
+                                href="{{ url_for(
+                                    'view_entry',
+                                    entry_id=recent_entry['id']
+                                ) }}"
+                                class="sidebar-recent-item
+                                {% if active_entry_id == recent_entry['id'] %}
+                                    active
+                                {% endif %}"
+                                title="Open Entry {{ recent_entry['id'] }}"
+                                aria-label="Open Entry {{ recent_entry['id'] }}"
+                            >
+
+                                <span
+                                    class="sidebar-recent-dot"
+                                    aria-hidden="true"
+                                ></span>
+
+
+                                <span class="sidebar-recent-copy">
+                                    Entry {{ recent_entry['id'] }}
+                                </span>
+
+                            </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                </section>
+
+            {% endif %}
+
+
+            <!-- =============================================
+                 SIDEBAR BOTTOM AREA
+            ============================================== -->
+
+            <div class="sidebar-footer">
+
+
+                <!-- Theme -->
+
+                <button
+                    type="button"
+                    class="sidebar-footer-action"
+                    data-theme-toggle
+                    aria-label="Switch to dark mode"
+                    title="Switch theme"
+                >
+
+                    <span class="sidebar-footer-icon">
+
+                        <span
+                            class="theme-icon"
+                            data-theme-icon
+                            aria-hidden="true"
+                        >
+                            ☾
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Appearance
+                    </span>
+
+                </button>
+
+
+                <!-- User -->
+
+                <div class="sidebar-user">
+
+                    <div
+                        class="sidebar-user-avatar"
+                        aria-hidden="true"
+                    >
+                        {{ session.get('username', 'U')[0]|upper }}
+                    </div>
+
+                    <div class="sidebar-user-copy">
+
+                        <span class="sidebar-user-name">
+                            {{ session.get('username') }}
+                        </span>
+
+                        <span class="sidebar-user-status">
+                            Private journal
+                        </span>
+
+                    </div>
 
                 </div>
 
-                <div class="tagline">
 
-                    Your private AI journal
+                <!-- Logout -->
 
-                </div>
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="sidebar-footer-action sidebar-logout"
+                >
+
+                    <span class="sidebar-footer-icon">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M10 17l5-5-5-5"></path>
+                            <path d="M15 12H3"></path>
+                            <path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"></path>
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Log out
+                    </span>
+
+                </a>
 
             </div>
 
-        </a>
+        </aside>
+
+
+        <!-- =================================================
+             MAIN APPLICATION CANVAS
+        ================================================== -->
+
+        <main class="app-main">
+
+
+            <!-- =============================================
+                 MOBILE TOP BAR
+            ============================================== -->
+
+            <header class="mobile-app-header">
+
+                <button
+                    type="button"
+                    class="mobile-sidebar-button"
+                    data-sidebar-open
+                    aria-label="Open navigation"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path d="M4 7h16"></path>
+                        <path d="M4 12h16"></path>
+                        <path d="M4 17h16"></path>
+                    </svg>
+
+                </button>
+
+
+                <a
+                    href="{{ url_for('index') }}"
+                    class="mobile-app-brand"
+                >
+
+                    <span class="mobile-app-brand-icon">
+                        J
+                    </span>
+
+                    <span>
+                        Journelle
+                    </span>
+
+                </a>
+
+
+                <button
+                    type="button"
+                    class="mobile-theme-toggle"
+                    data-theme-toggle
+                    aria-label="Switch to dark mode"
+                >
+
+                    <span
+                        data-theme-icon
+                        aria-hidden="true"
+                    >
+                        ☾
+                    </span>
+
+                </button>
+
+            </header>
+
+
+            <!-- =============================================
+                 FLASH MESSAGES
+            ============================================== -->
+
+            <div class="app-flash-area">
+
+                {% with messages = get_flashed_messages() %}
+
+                    {% if messages %}
+
+                        {% for message in messages %}
+
+                            <div class="flash">
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                {% endwith %}
+
+            </div>
+
+
+            <!-- =============================================
+                 PAGE CONTENT
+            ============================================== -->
+
+            <div class="app-content">
+
+                {% block content %}
+                {% endblock %}
+
+            </div>
+
+        </main>
 
     </div>
 
-    <div class="nav-right">
 
-        {% if session.get('user_id') %}
+<!-- =========================================================
+     AUTHENTICATION / PUBLIC SHELL
+========================================================= -->
 
-        <a href="{{ url_for('index') }}" class="logout-btn">
+{% else %}
 
-            New Entry
+    <div
+        class="page
+        {% if request.endpoint in auth_endpoints %}
+            auth-page
+        {% endif %}"
+    >
 
-        </a>
 
-        <a href="{{ url_for('archive') }}" class="logout-btn">
+        <!-- =================================================
+             AUTH PAGE TOP BAR
+        ================================================== -->
 
-            Archive
+        {% if request.endpoint in auth_endpoints %}
 
-        </a>
+            <div class="auth-top-bar">
 
-        <div class="user-pill">
+                <a
+                    href="{{ url_for('login') }}"
+                    class="auth-brand"
+                    aria-label="Journelle"
+                >
 
-            {{ session.get('username') }}
+                    <div class="auth-brand-icon">
+                        J
+                    </div>
 
-        </div>
+                    <span class="auth-brand-name">
+                        Journelle
+                    </span>
 
-        <a href="{{ url_for('logout') }}" class="logout-btn">
+                </a>
 
-            Logout
 
-        </a>
+                <button
+                    type="button"
+                    class="theme-toggle"
+                    data-theme-toggle
+                    aria-label="Switch to dark mode"
+                    title="Switch theme"
+                >
+
+                    <span
+                        class="theme-icon"
+                        data-theme-icon
+                        aria-hidden="true"
+                    >
+                        ☾
+                    </span>
+
+                </button>
+
+            </div>
+
+
+        <!-- =================================================
+             PUBLIC NAVIGATION
+        ================================================== -->
 
         {% else %}
 
-        <a href="{{ url_for('login') }}">
+            <nav>
 
-            Login
+                <div class="nav-left">
 
-        </a>
+                    <a
+                        href="{{ url_for('index') }}"
+                        class="logo-wrapper"
+                    >
 
-        <a href="{{ url_for('signup') }}" class="signup-btn">
+                        <div class="logo-icon">
+                            J
+                        </div>
 
-            Create Account
+                        <div>
 
-        </a>
+                            <div class="logo">
+                                Journelle
+                            </div>
+
+                            <div class="tagline">
+                                Your private AI journal
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+                <div class="nav-right">
+
+                    <a href="{{ url_for('login') }}">
+                        Login
+                    </a>
+
+                    <a
+                        href="{{ url_for('signup') }}"
+                        class="signup-btn"
+                    >
+                        Create Account
+                    </a>
+
+
+                    <button
+                        type="button"
+                        class="theme-toggle"
+                        data-theme-toggle
+                        aria-label="Switch to dark mode"
+                        title="Switch theme"
+                    >
+
+                        <span
+                            class="theme-icon"
+                            data-theme-icon
+                            aria-hidden="true"
+                        >
+                            ☾
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </nav>
+
+        {% endif %}
+
+
+        <!-- =================================================
+             FLASH MESSAGES
+        ================================================== -->
+
+        {% with messages = get_flashed_messages() %}
+
+            {% if messages %}
+
+                {% for message in messages %}
+
+                    <div class="flash">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        {% block public_content %}
+        {% endblock %}
+
+
+        {% if request.endpoint in auth_endpoints %}
+
+            <div class="public-content-bridge">
+
+                {{ self.content() }}
+
+            </div>
 
         {% endif %}
 
     </div>
 
-</nav>
+{% endif %}
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
 
-            {% for message in messages %}
+<!-- =========================================================
+     THEME + SIDEBAR SCRIPT
+========================================================= -->
 
-                <div class="flash">
+<script>
 
-                    {{ message }}
+    /* =====================================================
+       THEME
+    ====================================================== */
 
-                </div>
+    const themeToggles = document.querySelectorAll(
+        "[data-theme-toggle]"
+    );
 
-            {% endfor %}
+    const themeIcons = document.querySelectorAll(
+        "[data-theme-icon]"
+    );
 
-        {% endif %}
-    {% endwith %}
 
-    {% block content %}
-    {% endblock %}
+    function getCurrentTheme() {
 
-</div>
+        return document.documentElement.getAttribute(
+            "data-theme"
+        ) === "dark"
+            ? "dark"
+            : "light";
+
+    }
+
+
+    function updateThemeButtons() {
+
+        const currentTheme = getCurrentTheme();
+
+
+        themeIcons.forEach(function (themeIcon) {
+
+            if (currentTheme === "dark") {
+
+                themeIcon.textContent = "☀";
+
+            } else {
+
+                themeIcon.textContent = "☾";
+
+            }
+
+        });
+
+
+        themeToggles.forEach(function (themeToggle) {
+
+            if (currentTheme === "dark") {
+
+                themeToggle.setAttribute(
+                    "aria-label",
+                    "Switch to light mode"
+                );
+
+            } else {
+
+                themeToggle.setAttribute(
+                    "aria-label",
+                    "Switch to dark mode"
+                );
+
+            }
+
+        });
+
+    }
+
+
+    themeToggles.forEach(function (themeToggle) {
+
+        themeToggle.addEventListener(
+            "click",
+            function () {
+
+                const currentTheme =
+                    getCurrentTheme();
+
+                const newTheme =
+                    currentTheme === "dark"
+                        ? "light"
+                        : "dark";
+
+
+                document.documentElement.setAttribute(
+                    "data-theme",
+                    newTheme
+                );
+
+
+                localStorage.setItem(
+                    "journelle-theme",
+                    newTheme
+                );
+
+
+                updateThemeButtons();
+
+            }
+        );
+
+    });
+
+
+    updateThemeButtons();
+
+
+    /* =====================================================
+       MOBILE SIDEBAR
+    ====================================================== */
+
+    const appSidebar = document.querySelector(
+        "[data-app-sidebar]"
+    );
+
+    const sidebarOverlay = document.querySelector(
+        "[data-sidebar-overlay]"
+    );
+
+    const sidebarOpenButton = document.querySelector(
+        "[data-sidebar-open]"
+    );
+
+    const sidebarCloseButton = document.querySelector(
+        "[data-sidebar-close]"
+    );
+
+
+    function openSidebar() {
+
+        if (!appSidebar) {
+            return;
+        }
+
+        appSidebar.classList.add(
+            "sidebar-open"
+        );
+
+        if (sidebarOverlay) {
+
+            sidebarOverlay.classList.add(
+                "sidebar-overlay-visible"
+            );
+
+        }
+
+        document.body.classList.add(
+            "sidebar-is-open"
+        );
+
+    }
+
+
+    function closeSidebar() {
+
+        if (!appSidebar) {
+            return;
+        }
+
+        appSidebar.classList.remove(
+            "sidebar-open"
+        );
+
+        if (sidebarOverlay) {
+
+            sidebarOverlay.classList.remove(
+                "sidebar-overlay-visible"
+            );
+
+        }
+
+        document.body.classList.remove(
+            "sidebar-is-open"
+        );
+
+    }
+
+
+    if (sidebarOpenButton) {
+
+        sidebarOpenButton.addEventListener(
+            "click",
+            openSidebar
+        );
+
+    }
+
+
+    if (sidebarCloseButton) {
+
+        sidebarCloseButton.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+    }
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (event.key === "Escape") {
+
+                closeSidebar();
+
+            }
+
+        }
+    );
+
+
+    window.addEventListener(
+        "resize",
+        function () {
+
+            if (window.innerWidth > 900) {
+
+                closeSidebar();
+
+            }
+
+        }
+    );
+
+</script>
+
 
 </body>
+
 </html>

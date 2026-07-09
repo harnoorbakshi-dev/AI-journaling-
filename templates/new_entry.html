@@ -2,30 +2,185 @@
 
 {% block content %}
 
-<section class="hero">
-    <span class="hero-badge">✦ AI Journaling Companion</span>
-    <h1>Journelle</h1>
-    <p class="hero-subtitle">
-        Start wherever you are today. Your companion is listening.
-    </p>
-</section>
+<main class="pi-new-entry">
 
-<div class="entry-page">
+    <!-- =====================================================
+         CONVERSATION CANVAS
+    ====================================================== -->
 
-    <div class="chat-thread">
-        <div class="chat-bubble ai">What's on your mind today?</div>
+    <section class="pi-conversation-canvas">
+
+        <div class="pi-opening-message">
+
+            <div class="pi-companion-row">
+
+                <span
+                    class="pi-companion-orb"
+                    aria-hidden="true"
+                ></span>
+
+                <span class="pi-companion-name">
+                    Journelle
+                </span>
+
+            </div>
+
+
+            <div class="pi-opening-copy">
+
+                <h1>
+                    What's on your mind today?
+                </h1>
+
+                <p>
+                    I'm here. Start wherever feels right.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BOTTOM COMPOSER
+    ====================================================== -->
+
+    <div class="pi-composer-dock">
+
+        <form
+            action="{{ url_for('start_chat') }}"
+            method="POST"
+            class="pi-composer"
+            id="piNewEntryForm"
+        >
+
+            <textarea
+                name="message"
+                rows="1"
+                class="pi-composer-textarea"
+                placeholder="Talk to Journelle..."
+                aria-label="Write your journal entry"
+                autocomplete="off"
+                required
+            ></textarea>
+
+
+            <div class="pi-composer-actions">
+
+                <div class="pi-composer-status">
+
+                    <span
+                        class="pi-private-dot"
+                        aria-hidden="true"
+                    ></span>
+
+                    <span>
+                        Private
+                    </span>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="pi-send-button"
+                    aria-label="Send journal entry"
+                    title="Send"
+                >
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path d="M5 12h14"></path>
+                        <path d="M13 6l6 6-6 6"></path>
+                    </svg>
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <p class="pi-composer-note">
+            Your journal is private to your account.
+        </p>
+
     </div>
 
-    <form action="{{ url_for('start_chat') }}" method="POST" class="chat-input-form">
-        <textarea
-            name="message"
-            rows="1"
-            placeholder="Start writing..."
-            required
-        ></textarea>
-        <button type="submit">Send</button>
-    </form>
+</main>
 
-</div>
+
+<script>
+
+    const piTextarea = document.querySelector(
+        ".pi-composer-textarea"
+    );
+
+
+    if (piTextarea) {
+
+        /* =====================================================
+           AUTO-RESIZE
+        ====================================================== */
+
+        function resizePiTextarea() {
+
+            piTextarea.style.height = "auto";
+
+            piTextarea.style.height =
+                Math.min(
+                    piTextarea.scrollHeight,
+                    180
+                ) + "px";
+
+        }
+
+
+        piTextarea.addEventListener(
+            "input",
+            resizePiTextarea
+        );
+
+
+        /* =====================================================
+           ENTER SENDS
+           SHIFT + ENTER CREATES NEW LINE
+        ====================================================== */
+
+        piTextarea.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Enter"
+                    && !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    const form =
+                        piTextarea.closest("form");
+
+
+                    if (
+                        piTextarea.value.trim()
+                    ) {
+
+                        form.requestSubmit();
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+</script>
 
 {% endblock %}
