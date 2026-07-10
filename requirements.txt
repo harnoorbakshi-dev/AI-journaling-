@@ -37,3 +37,4 @@ websockets==16.0
 Werkzeug==3.1.8
 flask-socketio==5.3.6
 eventlet==0.40.0
+resend==2.32.2
