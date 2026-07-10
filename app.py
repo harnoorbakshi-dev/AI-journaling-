@@ -1171,6 +1171,100 @@ def end_chat(entry_id):
 # =========================================================
 # RUN APP
 # =========================================================
+# =========================================================
+# CHAT AJAX
+# =========================================================
 
+@app.route(
+    "/entry/<int:entry_id>/chat_ajax",
+    methods=["POST"]
+)
+@login_required
+def chat_ajax(entry_id):
+
+    from flask import jsonify
+
+    user_id = session["user_id"]
+
+    if get_entry_owner(entry_id) != user_id:
+        return jsonify({"error": "Entry not found."}), 404
+
+    entry = get_entry_by_id(user_id, entry_id)
+
+    if not entry:
+        return jsonify({"error": "Entry not found."}), 404
+
+    if entry["summary"]:
+        return jsonify({"error": "This conversation has already ended."}), 400
+
+    data = request.get_json()
+    user_message = (data.get("message", "") if data else "").strip()
+
+    if not user_message:
+        return jsonify({"error": "Message cannot be empty."}), 400
+
+    save_message(entry_id, "user", user_message)
+
+    history = [{"role": "ai", "content": entry["reflection"]}]
+
+    for m in get_messages_for_entry(entry_id):
+        history.append({"role": m["role"], "content": m["content"]})
+
+    ai_reply = generate_chat_reply(entry["content"], history)
+
+    save_message(entry_id, "ai", ai_reply)
+
+    return jsonify({
+        "user_message": user_message,
+        "ai_reply": ai_reply
+    })
+
+
+# =========================================================
+# END CHAT AJAX
+# =========================================================
+
+@app.route(
+    "/entry/<int:entry_id>/end_chat_ajax",
+    methods=["POST"]
+)
+@login_required
+def end_chat_ajax(entry_id):
+
+    from flask import jsonify
+
+    user_id = session["user_id"]
+
+    if get_entry_owner(entry_id) != user_id:
+        return jsonify({"error": "Entry not found."}), 404
+
+    entry = get_entry_by_id(user_id, entry_id)
+
+    if not entry:
+        return jsonify({"error": "Entry not found."}), 404
+
+    if entry["summary"]:
+        return jsonify({"error": "This conversation has already ended."}), 400
+
+    history = [{"role": "ai", "content": entry["reflection"]}]
+
+    for m in get_messages_for_entry(entry_id):
+        history.append({"role": m["role"], "content": m["content"]})
+
+    summary = generate_summary(entry["content"], history)
+
+    save_summary(entry_id, summary)
+
+    return jsonify({"summary": summary})
+    
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+    import eventlet
+    import eventlet.wsgi
+
+    port = int(os.environ.get("PORT", 5000))
+
+    eventlet.wsgi.server(
+        eventlet.listen(("0.0.0.0", port)),
+        app
+    )

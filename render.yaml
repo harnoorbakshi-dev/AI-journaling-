@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: journelle
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+    autoDeploy: true
