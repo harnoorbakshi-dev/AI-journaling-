@@ -81,7 +81,7 @@ from reflection import (
 
 app = Flask(__name__)
 
-app.secret_key = "dev-secret-key-change-this"
+app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-this")
 
 
 # =========================================================
