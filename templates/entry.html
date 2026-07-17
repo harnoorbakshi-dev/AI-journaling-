@@ -4,418 +4,295 @@
 
 <main class="conversation-workspace">
 
-    <!-- =====================================================
-         CONVERSATION TOP BAR
-    ====================================================== -->
-
     <header class="conversation-topbar">
-
-        <a
-            href="{{ url_for('archive') }}"
-            class="conversation-back"
-            aria-label="Back to journal archive"
-        >
-            <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-            >
+        <a href="{{ url_for('archive') }}" class="conversation-back" aria-label="Back to journal archive">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M19 12H5"></path>
                 <path d="M11 18l-6-6 6-6"></path>
             </svg>
-
-            <span>
-                Journal
-            </span>
+            <span>Journal</span>
         </a>
-
-
         <div class="conversation-meta">
-
-            <span class="conversation-entry-number">
-                Entry #{{ entry['id'] }}
-            </span>
-
-            <span
-                class="conversation-meta-dot"
-                aria-hidden="true"
-            ></span>
-
-            <span class="conversation-date">
-                {{ entry['created_at']|readable_date }}
-            </span>
-
+            <span class="conversation-entry-number">Entry #{{ entry['id'] }}</span>
+            <span class="conversation-meta-dot" aria-hidden="true"></span>
+            <span class="conversation-date">{{ entry['created_at']|readable_date }}</span>
         </div>
-
     </header>
 
-
-    <!-- =====================================================
-         CONVERSATION THREAD
-    ====================================================== -->
-
-    <section
-        class="conversation-thread"
-        id="conversationThread"
-        aria-label="Journal conversation"
-    >
-
-        <!-- =================================================
-             INITIAL CONVERSATION TURN
-        ================================================== -->
+    <section class="conversation-thread" id="conversationThread" aria-label="Journal conversation">
 
         <div class="conversation-turn">
-
-            <!-- Original journal entry -->
-
-            <article
-                class="conversation-message conversation-message-user"
-            >
+            <article class="conversation-message conversation-message-user">
                 <div class="conversation-message-content">{{ entry['content'] }}</div>
             </article>
-
-
-            <!-- Initial AI reflection -->
-
-            <article
-                class="conversation-message conversation-message-ai"
-            >
-
+            <article class="conversation-message conversation-message-ai">
                 <div class="conversation-ai-identity">
-
-                    <span
-                        class="conversation-ai-orb"
-                        aria-hidden="true"
-                    ></span>
-
-                    <span>
-                        Journelle
-                    </span>
-
+                    <span class="conversation-ai-orb" aria-hidden="true"></span>
+                    <span>Journelle</span>
                 </div>
-
                 <div class="conversation-message-content">{{ entry['reflection'] }}</div>
-
             </article>
-
         </div>
 
-
-        <!-- =================================================
-             ONGOING CONVERSATION
-        ================================================== -->
-
         {% for message in messages %}
-
             {% if message['role'] == "user" %}
-
                 <div class="conversation-turn">
-
-                    <article
-                        class="conversation-message conversation-message-user"
-                    >
+                    <article class="conversation-message conversation-message-user">
                         <div class="conversation-message-content">{{ message['content'] }}</div>
                     </article>
-
             {% else %}
-
-                    <article
-                        class="conversation-message conversation-message-ai"
-                    >
-
+                    <article class="conversation-message conversation-message-ai">
                         <div class="conversation-ai-identity">
-
-                            <span
-                                class="conversation-ai-orb"
-                                aria-hidden="true"
-                            ></span>
-
-                            <span>
-                                Journelle
-                            </span>
-
+                            <span class="conversation-ai-orb" aria-hidden="true"></span>
+                            <span>Journelle</span>
                         </div>
-
                         <div class="conversation-message-content">{{ message['content'] }}</div>
-
                     </article>
-
                 </div>
-
             {% endif %}
-
         {% endfor %}
-
-
-        <!-- =================================================
-             SAFETY FALLBACK
-
-             If the latest stored message is from the user and
-             no AI response exists yet, close the visual turn.
-        ================================================== -->
 
         {% if messages and messages[-1]['role'] == "user" %}
             </div>
         {% endif %}
 
-
-        <!-- =================================================
-             COMPLETED CONVERSATION SUMMARY
-        ================================================== -->
-
         {% if entry['summary'] %}
-
-            <section class="conversation-summary">
-
-                <div class="conversation-summary-heading">
-
-                    <span
-                        class="summary-spark"
-                        aria-hidden="true"
-                    >
-                        ✦
-                    </span>
-
-                    <div>
-
-                        <span class="summary-eyebrow">
-                            Reflection complete
-                        </span>
-
-                        <h2>
-                            Conversation Summary
-                        </h2>
-
-                    </div>
-
+        <section class="conversation-summary">
+            <div class="conversation-summary-heading">
+                <span class="summary-spark" aria-hidden="true">✦</span>
+                <div>
+                    <span class="summary-eyebrow">Reflection complete</span>
+                    <h2>Conversation Summary</h2>
                 </div>
-
-                <p>
-                    {{ entry['summary'] }}
-                </p>
-
-            </section>
-
+            </div>
+            <p>{{ entry['summary'] }}</p>
+        </section>
         {% endif %}
 
     </section>
 
-
-    <!-- =====================================================
-         ACTIVE CONVERSATION COMPOSER
-    ====================================================== -->
-
     {% if not entry['summary'] %}
-
-        <div class="conversation-composer-area">
-
-            <form
-                action="{{ url_for('chat', entry_id=entry['id']) }}"
-                method="POST"
-                class="conversation-composer"
-                id="conversationComposer"
-            >
-
-                <textarea
-                    name="message"
-                    rows="1"
-                    class="conversation-textarea"
-                    placeholder="Continue your reflection..."
-                    aria-label="Message Journelle"
-                    required
-                ></textarea>
-
-
-                <div class="conversation-composer-footer">
-
-                    <div class="conversation-composer-context">
-
-                        <span
-                            class="privacy-dot"
-                            aria-hidden="true"
-                        ></span>
-
-                        <span>
-                            Private conversation
-                        </span>
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="conversation-send-button"
-                        aria-label="Send message"
-                        title="Send"
-                    >
-
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
-                            <path d="M5 12h14"></path>
-                            <path d="M13 6l6 6-6 6"></path>
-                        </svg>
-
-                    </button>
-
+    <div class="conversation-composer-area">
+        <form class="conversation-composer" id="conversationComposer">
+            <textarea name="message" rows="1" class="conversation-textarea" placeholder="Continue your reflection..." aria-label="Message Journelle"></textarea>
+            <div class="conversation-composer-footer">
+                <div class="conversation-composer-context">
+                    <span class="privacy-dot" aria-hidden="true"></span>
+                    <span>Private conversation</span>
                 </div>
-
-            </form>
-
-
-            <form
-                action="{{ url_for(
-                    'end_chat',
-                    entry_id=entry['id']
-                ) }}"
-                method="POST"
-                class="finish-conversation-form"
-            >
-
-                <button
-                    type="submit"
-                    class="finish-conversation-button"
-                >
-
-                    <span
-                        class="finish-conversation-icon"
-                        aria-hidden="true"
-                    >
-                        ✦
-                    </span>
-
-                    <span>
-                        Finish and summarize
-                    </span>
-
+                <button type="submit" class="conversation-send-button" id="sendButton" aria-label="Send message" title="Send">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 12h14"></path>
+                        <path d="M13 6l6 6-6 6"></path>
+                    </svg>
                 </button>
-
-            </form>
-
-        </div>
-
+            </div>
+        </form>
+        <form class="finish-conversation-form" id="finishForm">
+            <button type="submit" class="finish-conversation-button">
+                <span class="finish-conversation-icon" aria-hidden="true">✦</span>
+                <span>Finish and summarize</span>
+            </button>
+        </form>
+    </div>
     {% else %}
-
-        <div class="completed-conversation-actions">
-
-            <a
-                href="{{ url_for('index') }}"
-                class="start-new-reflection-link"
-            >
-                Start a new reflection
-            </a>
-
-        </div>
-
+    <div class="completed-conversation-actions">
+        <a href="{{ url_for('index') }}" class="start-new-reflection-link">Start a new reflection</a>
+    </div>
     {% endif %}
 
 </main>
 
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
 <script>
 
-    const conversationTextarea = document.querySelector(
-        ".conversation-textarea"
-    );
+    const ENTRY_ID   = {{ entry['id'] }};
+    const thread     = document.getElementById("conversationThread");
+    const composer   = document.getElementById("conversationComposer");
+    const textarea   = composer && composer.querySelector(".conversation-textarea");
+    const sendBtn    = document.getElementById("sendButton");
+    const finishForm = document.getElementById("finishForm");
 
-    const conversationThread = document.getElementById(
-        "conversationThread"
-    );
+    const socket = io({ transports: ["websocket", "polling"] });
 
+    socket.on("connect", function () {
+        socket.emit("join_entry", { entry_id: ENTRY_ID });
+    });
 
-    /* =====================================================
-       AUTO-RESIZE TEXTAREA
-    ====================================================== */
+    socket.on("connect_error", function (err) {
+        console.warn("Socket.IO connection error:", err.message);
+    });
 
-    if (conversationTextarea) {
+    function escapeHtml(str) {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-        function resizeConversationTextarea() {
+    function scrollToBottom() {
+        if (thread) thread.scrollTop = thread.scrollHeight;
+    }
 
-            conversationTextarea.style.height = "auto";
-
-            conversationTextarea.style.height =
-                Math.min(
-                    conversationTextarea.scrollHeight,
-                    180
-                ) + "px";
-
+    function setInputEnabled(enabled) {
+        if (textarea) textarea.disabled = !enabled;
+        if (sendBtn) {
+            sendBtn.disabled = !enabled;
+            sendBtn.style.opacity = enabled ? "1" : "0.5";
         }
-
-
-        conversationTextarea.addEventListener(
-            "input",
-            resizeConversationTextarea
-        );
-
-
-        resizeConversationTextarea();
-
-
-        /* =================================================
-           ENTER SENDS
-           SHIFT + ENTER CREATES NEW LINE
-        ================================================== */
-
-        conversationTextarea.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    event.key === "Enter"
-                    && !event.shiftKey
-                ) {
-
-                    event.preventDefault();
-
-                    const form =
-                        conversationTextarea.closest("form");
-
-                    if (
-                        conversationTextarea.value.trim()
-                    ) {
-
-                        form.requestSubmit();
-
-                    }
-
-                }
-
-            }
-        );
-
     }
 
-
-    /* =====================================================
-       SCROLL TO LATEST CONVERSATION TURN
-    ====================================================== */
-
-    if (conversationThread) {
-
-        window.addEventListener(
-            "load",
-            function () {
-
-                const turns =
-                    conversationThread.querySelectorAll(
-                        ".conversation-turn"
-                    );
-
-                if (turns.length > 1) {
-
-                    turns[
-                        turns.length - 1
-                    ].scrollIntoView({
-                        behavior: "smooth",
-                        block: "start"
-                    });
-
-                }
-
-            }
-        );
-
+    function resizeTextarea() {
+        if (!textarea) return;
+        textarea.style.height = "auto";
+        textarea.style.height = Math.min(textarea.scrollHeight, 180) + "px";
     }
+
+    function appendUserBubble(text) {
+        const turn = document.createElement("div");
+        turn.className = "conversation-turn";
+        turn.innerHTML = `
+            <article class="conversation-message conversation-message-user">
+                <div class="conversation-message-content">${escapeHtml(text)}</div>
+            </article>
+        `;
+        thread.appendChild(turn);
+        scrollToBottom();
+    }
+
+    let typingEl = null;
+
+    function showTypingIndicator() {
+        typingEl = document.createElement("article");
+        typingEl.className = "conversation-message conversation-message-ai";
+        typingEl.innerHTML = `
+            <div class="conversation-ai-identity">
+                <span class="conversation-ai-orb" aria-hidden="true"></span>
+                <span>Journelle</span>
+            </div>
+            <div class="conversation-message-content typing-dots">
+                <span></span><span></span><span></span>
+            </div>
+        `;
+        thread.appendChild(typingEl);
+        scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+        if (typingEl) { typingEl.remove(); typingEl = null; }
+    }
+
+    function appendAiBubble(text) {
+        const article = document.createElement("article");
+        article.className = "conversation-message conversation-message-ai";
+        article.innerHTML = `
+            <div class="conversation-ai-identity">
+                <span class="conversation-ai-orb" aria-hidden="true"></span>
+                <span>Journelle</span>
+            </div>
+            <div class="conversation-message-content">${escapeHtml(text)}</div>
+        `;
+        thread.appendChild(article);
+        scrollToBottom();
+    }
+
+    socket.on("typing_start", function () { showTypingIndicator(); });
+    socket.on("typing_stop",  function () { hideTypingIndicator(); });
+
+    socket.on("ai_reply", function (data) {
+        hideTypingIndicator();
+        appendAiBubble(data.content);
+        setInputEnabled(true);
+        if (textarea) textarea.focus();
+    });
+
+    socket.on("error", function (data) {
+        hideTypingIndicator();
+        setInputEnabled(true);
+        alert(data.message || "Something went wrong. Please try again.");
+    });
+
+    socket.on("summarising", function () {
+        const note = document.getElementById("summarising-note");
+        if (note) note.style.display = "block";
+    });
+
+    socket.on("summary_ready", function (data) {
+        const summarySection = document.createElement("section");
+        summarySection.className = "conversation-summary";
+        summarySection.innerHTML = `
+            <div class="conversation-summary-heading">
+                <span class="summary-spark" aria-hidden="true">✦</span>
+                <div>
+                    <span class="summary-eyebrow">Reflection complete</span>
+                    <h2>Conversation Summary</h2>
+                </div>
+            </div>
+            <p>${escapeHtml(data.summary)}</p>
+        `;
+        thread.appendChild(summarySection);
+
+        const composerArea = document.querySelector(".conversation-composer-area");
+        if (composerArea) {
+            composerArea.outerHTML = `
+                <div class="completed-conversation-actions">
+                    <a href="/" class="start-new-reflection-link">Start a new reflection</a>
+                </div>
+            `;
+        }
+        scrollToBottom();
+    });
+
+    function sendMessage() {
+        if (!textarea) return;
+        const message = textarea.value.trim();
+        if (!message) return;
+        appendUserBubble(message);
+        textarea.value = "";
+        resizeTextarea();
+        setInputEnabled(false);
+        socket.emit("send_message", { entry_id: ENTRY_ID, message: message });
+    }
+
+    if (composer) {
+        composer.addEventListener("submit", function (e) {
+            e.preventDefault();
+            sendMessage();
+        });
+    }
+
+    if (textarea) {
+        textarea.addEventListener("input", resizeTextarea);
+        resizeTextarea();
+        textarea.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (textarea.value.trim()) sendMessage();
+            }
+        });
+    }
+
+    if (finishForm) {
+        finishForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const btn = finishForm.querySelector("button");
+            if (btn) { btn.disabled = true; btn.style.opacity = "0.5"; }
+            let note = document.getElementById("summarising-note");
+            if (!note) {
+                note = document.createElement("p");
+                note.id = "summarising-note";
+                note.textContent = "Summarising your conversation...";
+                note.style.cssText = "text-align:center;color:var(--muted);margin-top:16px;font-size:.9rem;";
+                finishForm.parentElement.appendChild(note);
+            }
+            socket.emit("end_conversation", { entry_id: ENTRY_ID });
+        });
+    }
+
+    window.addEventListener("load", scrollToBottom);
 
 </script>
 
