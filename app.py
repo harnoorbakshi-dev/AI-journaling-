@@ -100,7 +100,7 @@ app.secret_key = os.getenv(
 # which works on Python 3.13 without any compatibility issues.
 socketio = SocketIO(
     app,
-    async_mode=None,
+    async_mode="threading",
     cors_allowed_origins="*"
 )
 
