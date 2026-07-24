@@ -4505,3 +4505,48 @@ input[type="date"]{
     0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
     30% { transform: translateY(-6px); opacity: 1; }
 }
+
+
+/* =========================================================
+                 AI CONVERSATION TITLES
+========================================================= */
+
+.sidebar-recent-copy{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    min-width:0;
+}
+
+.sidebar-recent-title{
+    font-weight:700;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.sidebar-recent-time{
+    font-size:.76rem;
+    color:var(--muted);
+}
+
+#conversationTitle{
+    font-weight:700;
+    color:var(--primary);
+}
+
+.title-fade{
+    animation:titleFade .6s ease;
+}
+
+@keyframes titleFade{
+    from{
+        opacity:0;
+        transform:translateY(6px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}

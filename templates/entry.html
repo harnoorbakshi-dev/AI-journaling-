@@ -13,7 +13,7 @@
             <span>Journal</span>
         </a>
         <div class="conversation-meta">
-            <span class="conversation-entry-number">Entry #{{ entry['id'] }}</span>
+            <span class="conversation-entry-number"><span id="conversationTitle">{{ entry['title'] if entry['title'] else ('Entry #' ~ entry['id']) }}</span></span>
             <span class="conversation-meta-dot" aria-hidden="true"></span>
             <span class="conversation-date">{{ entry['created_at']|readable_date }}</span>
         </div>
@@ -103,7 +103,7 @@
 
 </main>
 
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 
 <script>
 
@@ -115,6 +115,21 @@
     const finishForm = document.getElementById("finishForm");
 
     const socket = io({ transports: ["websocket", "polling"] });
+    window.socket = socket;
+
+    console.log("Socket created:", socket);
+
+    socket.on("connect", () => {
+       console.log("✅ Connected", socket.id);
+    });
+
+    socket.on("connect_error", (err) => {
+       console.error("❌ Connect error:", err);
+   });
+
+    socket.on("disconnect", (reason) => {
+        console.warn("Disconnected:", reason);
+    });
 
     socket.on("connect", function () {
         socket.emit("join_entry", { entry_id: ENTRY_ID });
@@ -208,6 +223,20 @@
         setInputEnabled(true);
         if (textarea) textarea.focus();
     });
+
+    
+    socket.on("title_updated", function(data){
+        const title=document.getElementById("conversationTitle");
+        if(title){
+            title.textContent=data.title;
+            title.classList.add("title-fade");
+            setTimeout(()=>title.classList.remove("title-fade"),600);
+        }
+        document.dispatchEvent(new CustomEvent("title_updated",{
+            detail:{entry_id:ENTRY_ID,title:data.title}
+        }));
+    });
+
 
     socket.on("error", function (data) {
         hideTypingIndicator();

@@ -53,7 +53,15 @@
             }
 
         })();
-    </script>
+    document.addEventListener("title_updated",function(e){
+const el=document.querySelector('[data-entry-title="'+e.detail.entry_id+'"]');
+if(el){
+el.textContent=e.detail.title;
+el.classList.add("title-fade");
+setTimeout(()=>el.classList.remove("title-fade"),600);
+}
+});
+</script>
 
 
     <link
@@ -271,7 +279,12 @@
 
 
                                 <span class="sidebar-recent-copy">
-                                    Entry {{ recent_entry['id'] }}
+                                    <span class="sidebar-recent-title" data-entry-title="{{ recent_entry['id'] }}">
+                                        {{ recent_entry['title'] if recent_entry['title'] else ('Entry #' ~ recent_entry['id']) }}
+                                    </span>
+                                    <span class="sidebar-recent-time">
+                                        {{ recent_entry['relative_time'] if recent_entry['relative_time'] is defined else recent_entry['created_at']|readable_date }}
+                                    </span>
                                 </span>
 
                             </a>
@@ -668,7 +681,7 @@
 <!-- =========================================================
      THEME + SIDEBAR SCRIPT
 ========================================================= -->
-
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 
     /* =====================================================

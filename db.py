@@ -99,10 +99,30 @@ def init_db():
                 content TEXT NOT NULL,
                 reflection TEXT,
                 summary TEXT,
+                title TEXT,
+                title_locked INTEGER DEFAULT 0,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
+
+        # Existing database migration for entries
+        entry_columns = {
+            row["name"]
+            for row in conn.execute(
+                "PRAGMA table_info(entries)"
+            ).fetchall()
+        }
+
+        if "title" not in entry_columns:
+            conn.execute(
+                "ALTER TABLE entries ADD COLUMN title TEXT"
+            )
+
+        if "title_locked" not in entry_columns:
+            conn.execute(
+                "ALTER TABLE entries ADD COLUMN title_locked INTEGER DEFAULT 0"
+            )
 
         # =====================================================
         # MESSAGES TABLE
@@ -182,6 +202,8 @@ def init_db():
                 content TEXT NOT NULL,
                 reflection TEXT,
                 summary TEXT,
+                title TEXT,
+                title_locked INTEGER DEFAULT 0,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
@@ -253,6 +275,8 @@ def get_all_entries(user_id):
         """
         SELECT
             id,
+            title,
+            title_locked,
             content,
             created_at
         FROM entries
@@ -290,6 +314,8 @@ def get_recent_entries(user_id, limit=7):
         """
         SELECT
             id,
+            title,
+            title_locked,
             content,
             created_at
         FROM entries
@@ -327,6 +353,8 @@ def get_entry_by_id(user_id, entry_id):
             content,
             reflection,
             summary,
+            title,
+            title_locked,
             created_at
         FROM entries
         WHERE id = ?
@@ -358,6 +386,8 @@ def get_entries_by_date(user_id, date_str):
         """
         SELECT
             id,
+            title,
+            title_locked,
             content,
             created_at
         FROM entries
@@ -611,3 +641,35 @@ def update_user_password(user_id, password_hash):
 
     conn.commit()
     conn.close()
+
+def update_entry_title(entry_id, title):
+    conn = get_connection()
+    conn.execute(
+        '''
+        UPDATE entries
+        SET title = ?, title_locked = 1
+        WHERE id = ?
+        ''',
+        (title, entry_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_entry_title(entry_id):
+    conn = get_connection()
+    row = conn.execute(
+        '''
+        SELECT title, title_locked
+        FROM entries
+        WHERE id = ?
+        ''',
+        (entry_id,),
+    ).fetchone()
+    conn.close()
+    if row is None:
+        return None
+    return {
+        "title": row["title"],
+        "locked": bool(row["title_locked"]),
+    }

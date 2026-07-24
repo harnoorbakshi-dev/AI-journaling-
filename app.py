@@ -68,7 +68,9 @@ from db import (
     get_messages_for_entry,
     save_summary,
     get_entry_owner,
-    update_user_password
+    update_user_password,
+    update_entry_title,
+    get_entry_title
 )
 
 
@@ -79,7 +81,8 @@ from db import (
 from reflection import (
     generate_reflection,
     generate_chat_reply,
-    generate_summary
+    generate_summary,
+    generate_title
 )
 
 
@@ -146,6 +149,22 @@ def inject_sidebar_context():
         "recent_entries": recent_entries,
         "active_entry_id": active_entry_id
     }
+
+
+
+
+def format_relative_time(iso_string):
+    now=datetime.now()
+    dt=datetime.fromisoformat(iso_string)
+    diff=now-dt
+    s=int(diff.total_seconds())
+    if s<10:return "Just now"
+    if s<60:return f"{s} sec ago"
+    if s<3600:return f"{s//60} min ago"
+    if s<86400:return f"{s//3600} hr ago"
+    if s<172800:return "Yesterday"
+    if s<604800:return f"{s//86400} days ago"
+    return dt.strftime("%b %d")
 
 
 # =========================================================
@@ -721,9 +740,53 @@ def handle_send_message(data):
     ai_reply = generate_chat_reply(entry["content"], history)
     save_message(entry_id, "ai", ai_reply)
 
-    # Stop typing indicator and send reply
-    emit("typing_stop", {})
-    emit("ai_reply", {"content": ai_reply}, to=f"entry_{entry_id}")
+    emit(
+        "typing_stop",
+        {},
+        to=f"entry_{entry_id}"
+    )
+
+    emit(
+        "ai_reply",
+        {
+            "content": ai_reply
+        },
+        to=f"entry_{entry_id}"
+    )
+
+    title_info = get_entry_title(entry_id)
+
+    if (not title_info) or (not title_info["locked"]):
+
+        print("\n===== TITLE GENERATION =====")
+
+        try:
+            title = generate_title(
+                entry["content"],
+                history + [{"role": "ai", "content": ai_reply}]
+            )
+
+            print("Generated title:", repr(title))
+
+            if title:
+                update_entry_title(entry_id, title)
+                print("Saved title to database")
+
+                emit(
+                    "title_updated",
+                    {
+                        "entry_id": entry_id,
+                        "title": title
+                    },
+                    to=f"entry_{entry_id}"
+                )
+            else:
+                print("generate_title() returned None or empty")
+
+        except Exception as e:
+            print("TITLE ERROR:", e)
+
+    print("============================\n")
 
 
 @socketio.on("end_conversation")
