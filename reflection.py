@@ -1,9 +1,27 @@
-from google import genai
-from google.genai import types, errors
+import os
+import traceback
 
-client = genai.Client()
+from google import genai
+from google.genai import types
+
+# ------------------------------------------------------------------
+# Gemini Configuration
+# ------------------------------------------------------------------
+
+API_KEY = os.environ.get("GEMINI_API_KEY")
+
+if not API_KEY:
+    raise RuntimeError(
+        "GEMINI_API_KEY environment variable is not set."
+    )
+
+client = genai.Client(api_key=API_KEY)
 
 MODEL_NAME = "gemini-2.5-flash"
+
+# ------------------------------------------------------------------
+# Prompts
+# ------------------------------------------------------------------
 
 SYSTEM_PROMPT = (
     "You are a thoughtful, emotionally attuned journaling companion. "
@@ -36,6 +54,10 @@ BANNED = {
     "my journal",
 }
 
+# ------------------------------------------------------------------
+# Helper
+# ------------------------------------------------------------------
+
 def _call(prompt, system_prompt, max_tokens=300, temperature=0.8, timeout=15):
     response = client.models.generate_content(
         model=MODEL_NAME,
@@ -48,43 +70,104 @@ def _call(prompt, system_prompt, max_tokens=300, temperature=0.8, timeout=15):
             http_options=types.HttpOptions(timeout=timeout * 1000),
         ),
     )
+
+    if not response.text:
+        raise RuntimeError("Gemini returned an empty response.")
+
     return response.text.strip()
+
+
+# ------------------------------------------------------------------
+# Reflection
+# ------------------------------------------------------------------
 
 def generate_reflection(entry_text, timeout=15):
     try:
-        return _call(entry_text, SYSTEM_PROMPT, 300, 0.8, timeout)
-    except Exception:
-        return ("Something unexpected happened while generating a reflection, "
-                "but your entry has been saved safely.")
+        return _call(
+            entry_text,
+            SYSTEM_PROMPT,
+            300,
+            0.8,
+            timeout,
+        )
+
+    except Exception as e:
+        print("\n========== REFLECTION ERROR ==========")
+        traceback.print_exc()
+        print(repr(e))
+        print("======================================\n")
+
+        return (
+            "Something unexpected happened while generating a reflection, "
+            "but your entry has been saved safely."
+        )
+
+
+# ------------------------------------------------------------------
+# Chat Reply
+# ------------------------------------------------------------------
 
 def generate_chat_reply(entry_text, conversation_history, timeout=15):
     contents = []
+
     for msg in conversation_history:
         role = "model" if msg["role"] == "ai" else "user"
-        contents.append(types.Content(role=role, parts=[types.Part(text=msg["content"])]))
+
+        contents.append(
+            types.Content(
+                role=role,
+                parts=[types.Part(text=msg["content"])]
+            )
+        )
+
     try:
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=contents,
             config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT +
-                f"\n\nOriginal journal entry:\n{entry_text}",
+                system_instruction=(
+                    SYSTEM_PROMPT
+                    + f"\n\nOriginal journal entry:\n{entry_text}"
+                ),
                 max_output_tokens=300,
                 temperature=0.8,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-                http_options=types.HttpOptions(timeout=timeout * 1000),
+                thinking_config=types.ThinkingConfig(
+                    thinking_budget=0
+                ),
+                http_options=types.HttpOptions(
+                    timeout=timeout * 1000
+                ),
             ),
         )
+
+        if not response.text:
+            raise RuntimeError("Gemini returned an empty response.")
+
         return response.text.strip()
-    except Exception:
-        return ("Something unexpected happened, but the conversation has "
-                "been saved safely.")
+
+    except Exception as e:
+        print("\n========== CHAT ERROR ==========")
+        traceback.print_exc()
+        print(repr(e))
+        print("================================\n")
+
+        return (
+            "Something unexpected happened, but the conversation has "
+            "been saved safely."
+        )
+
+
+# ------------------------------------------------------------------
+# Summary
+# ------------------------------------------------------------------
 
 def generate_summary(entry_text, conversation_history, timeout=15):
     transcript = [f"Journal entry: {entry_text}"]
+
     for msg in conversation_history:
         speaker = "Companion" if msg["role"] == "ai" else "User"
         transcript.append(f"{speaker}: {msg['content']}")
+
     try:
         return _call(
             "\n".join(transcript),
@@ -93,8 +176,19 @@ def generate_summary(entry_text, conversation_history, timeout=15):
             0.7,
             timeout,
         )
-    except Exception:
+
+    except Exception as e:
+        print("\n========== SUMMARY ERROR ==========")
+        traceback.print_exc()
+        print(repr(e))
+        print("===================================\n")
+
         return "Summary unavailable, but the full conversation is saved below."
+
+
+# ------------------------------------------------------------------
+# Title
+# ------------------------------------------------------------------
 
 def generate_title(entry_text, conversation_history, timeout=15):
     meaningful = len(entry_text.split()) >= 15
@@ -102,7 +196,9 @@ def generate_title(entry_text, conversation_history, timeout=15):
 
     for msg in conversation_history:
         if len(msg["content"].split()) >= 4:
-            history_text.append(f'{msg["role"]}: {msg["content"]}')
+            history_text.append(
+                f'{msg["role"]}: {msg["content"]}'
+            )
 
     if len(history_text) < 2 and not meaningful:
         return None
@@ -114,8 +210,17 @@ def generate_title(entry_text, conversation_history, timeout=15):
     )
 
     try:
-        title = _call(prompt, TITLE_PROMPT, 20, 0.4, timeout)
-        title = " ".join(title.replace('"', "").split())[:60].strip()
+        title = _call(
+            prompt,
+            TITLE_PROMPT,
+            20,
+            0.4,
+            timeout,
+        )
+
+        title = " ".join(
+            title.replace('"', "").split()
+        )[:60].strip()
 
         if not title:
             return None
@@ -124,9 +229,16 @@ def generate_title(entry_text, conversation_history, timeout=15):
             return None
 
         words = title.split()
+
         if len(words) > 5:
             title = " ".join(words[:5])
 
         return title
-    except Exception:
+
+    except Exception as e:
+        print("\n========== TITLE ERROR ==========")
+        traceback.print_exc()
+        print(repr(e))
+        print("=================================\n")
+
         return None
